@@ -1,5 +1,7 @@
 #ifdef CUTDOWN
 
+unsigned long CutdownOffAt=0;
+
 void SetupCutdown(void)
 {
     digitalWrite(CUTDOWN, 0);
@@ -7,13 +9,11 @@ void SetupCutdown(void)
     digitalWrite(CUTDOWN, 0);
 }
 
-void CutdownNow(void)
+void CutdownNow(unsigned long Period)
 {
   Serial.println("CUTDOWN ON");
   digitalWrite(CUTDOWN, 1);
-  delay(5000);
-  digitalWrite(CUTDOWN, 0);
-  Serial.println("CUTDOWN OFF");
+  CutdownOffAt = millis() + Period;
 }
 
 void CheckCutdown(void)
@@ -31,26 +31,20 @@ void CheckCutdown(void)
     // Trigger only if armed
     if (GPS.CutdownStatus == 1)
     {
-      // Uncomment/modify the following code to trigger the cutdown appropriately for your flight
-    
       // ALTITUDE TEST
-      /*
-      if (GPS.Altitude > 12000)
+      if ((GPS.CutdownAltitude > 2000) && (GPS.Altitude > GPS.CutdownAltitude))
       {
         GPS.CutdownStatus = 2;      // Altitude trigger
-        CutdownNow();
+        CutdownNow(GPS.CutdownPeriod);
       }
-      */
-    
-      // LONGITUDE TEST
-      /*
-      if ((GPS.Longitude < -6.5)
-      {
-        GPS.CutdownStatus = 3;      // Longitude trigger
-        CutdownNow();
-      }
-      */
     }
+  }
+
+  if ((CutdownOffAt > 0) && (millis() >= CutdownOffAt))
+  {
+    digitalWrite(CUTDOWN, 0);
+    Serial.println("CUTDOWN OFF");
+    CutdownOffAt = 0;
   }
 }
 
