@@ -96,8 +96,9 @@
 #define PA_MAX_BOOST                0x8F    // 100mW (max 869.4 - 869.65)
 #define PA_LOW_BOOST                0x81
 #define PA_MED_BOOST                0x8A
-#define PA_MAX_UK                   0x88    // 10mW (max 434)
-#define PA_OFF_BOOST                0x00
+#define PA_MAX_UK                   0x88    // 10mW (max 434) 10dBm
+#define PA_MAX_868_SPAIN            0x8C    // 25mW (max 868) 14dBm
+#define PA_OFF_BOOST                0x80
 #define RFO_MIN                     0x00
 
 // 20DBm
@@ -269,7 +270,7 @@ void setMode(byte newMode)
   {
     case RF98_MODE_TX:
       writeRegister(REG_LNA, LNA_OFF_GAIN);  // TURN LNA OFF FOR TRANSMITT
-      writeRegister(REG_PA_CONFIG, PA_MAX_UK);
+      writeRegister(REG_PA_CONFIG, PA_MAX_868_SPAIN);
       writeRegister(REG_OPMODE, newMode);
       currentMode = newMode; 
       
@@ -866,7 +867,7 @@ void SwitchToFSKMode(void)
   writeRegister(REG_OPMODE, mode & ~(uint8_t)(7<<5));         //set to FSK
 
   writeRegister(REG_LNA, LNA_OFF_GAIN);  // TURN LNA OFF FOR TRANSMIT
-  writeRegister(REG_PA_CONFIG, PA_MAX_UK);
+  writeRegister(REG_PA_CONFIG, PA_MAX_868_SPAIN);
     
   // Frequency
   FrequencyValue = (unsigned long)((Settings.RTTYFrequency + (LORA_OFFSET / 1000.0)) * 7110656 / 434);
