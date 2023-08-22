@@ -98,12 +98,15 @@
 #define PA_MED_BOOST                0x8A
 #define PA_MAX_UK                   0x88    // 10mW (max 434) 10dBm
 #define PA_MAX_868_SPAIN            0x8C    // 25mW (max 868) 14dBm
+#define PA_CONFIGURED               PA_MAX_868_SPAIN
 #define PA_OFF_BOOST                0x80
 #define RFO_MIN                     0x00
 
-// 20DBm
+// 20DBm High Power
 #define REG_PA_DAC                  0x4D
-#define PA_DAC_20                   0x87
+#define PA_DAC_20                   0x87    // DAC for high power
+#define REG_PA_OCP                  0x0B
+#define PA_OCP_MAX_BOOST            0x31    // Overcurrent for high power
 
 // LOW NOISE AMPLIFIER
 #define REG_LNA                     0x0C
@@ -270,7 +273,11 @@ void setMode(byte newMode)
   {
     case RF98_MODE_TX:
       writeRegister(REG_LNA, LNA_OFF_GAIN);  // TURN LNA OFF FOR TRANSMITT
-      writeRegister(REG_PA_CONFIG, PA_MAX_868_SPAIN);
+#if PA_CONFIGURED == PA_MAX_BOOST
+      writeRegister(REG_PA_DAC, PA_DAC_20);
+      writeRegister(REG_PA_OCP, PA_OCP_MAX_BOOST);
+#endif
+      writeRegister(REG_PA_CONFIG, PA_CONFIGURED);
       writeRegister(REG_OPMODE, newMode);
       currentMode = newMode; 
       
@@ -867,7 +874,7 @@ void SwitchToFSKMode(void)
   writeRegister(REG_OPMODE, mode & ~(uint8_t)(7<<5));         //set to FSK
 
   writeRegister(REG_LNA, LNA_OFF_GAIN);  // TURN LNA OFF FOR TRANSMIT
-  writeRegister(REG_PA_CONFIG, PA_MAX_868_SPAIN);
+  writeRegister(REG_PA_CONFIG, PA_CONFIGURED);
     
   // Frequency
   FrequencyValue = (unsigned long)((Settings.RTTYFrequency + (LORA_OFFSET / 1000.0)) * 7110656 / 434);
