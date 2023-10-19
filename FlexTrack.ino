@@ -24,14 +24,16 @@
 // Options
 #define CUTDOWN             25      // This pin made active to cut down from balloon
 #define ENABLE_UPLINK               // Enables uplink code, for which you need to set TDM mode for transmission/reception
+#define HEARTBEAT_LED       4       // On-board LED on GPIO4
+#define USER_BUTTON         38      // User butotn on GPIO38
 
 // Pin list
 unsigned char PinList[] = {2, 4, 13};
 
 // PRODUCT INFO
-#define   VERSION     "V1.45"
+#define   VERSION     "V1.46"
 #define   PRODUCT     "FlexTrack"
-#define   DESCRIPTION "T-Beam with B2Space Mods and extra I2C comms"
+#define   DESCRIPTION "T-Beam with B2Space Mods and extra I2C comms and debug"
 
 // FIXED CONFIG
 
@@ -249,6 +251,13 @@ void setup()
   
   Serial.begin(38400);
 
+  // Setup LED
+  pinMode(HEARTBEAT_LED, OUTPUT);
+  digitalWrite(HEARTBEAT_LED, LOW);
+
+  // Setup User Button
+  pinMode(USER_BUTTON, INPUT);
+
   delay(1000);
   
   Serial.println();
@@ -337,6 +346,8 @@ void setup()
 #ifdef I2C_SLAVE_ADDR
   SetupSlave();
 #endif
+
+  digitalWrite(HEARTBEAT_LED, HIGH); // Turn off LED after setup
 }
 
 
@@ -371,6 +382,7 @@ void loop()
   CheckHost();
 
   CheckPrediction();
+
 }
 
 void CheckHost(void)

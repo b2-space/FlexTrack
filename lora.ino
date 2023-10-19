@@ -640,7 +640,9 @@ int LoRaIsFree(void)
 void SendLoRaPacket(unsigned char *buffer, int Length)
 {
   int i;
-  
+
+  digitalWrite(HEARTBEAT_LED, LOW);
+
   LastLoRaTX = millis();
   TimeToSendIfNoGPS = 0;
 
@@ -677,6 +679,8 @@ void SendLoRaPacket(unsigned char *buffer, int Length)
   
   LoRaMode = lmSending;
   SendingRTTY = 0;
+  
+  digitalWrite(HEARTBEAT_LED, HIGH);
 }
 
 void startReceiving(void)
