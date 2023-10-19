@@ -8,9 +8,15 @@ This code provides simultaneous (where legal and supported by the hardware insta
 
 ## Libraries
 
+In Arduino add esp32 boards and select *T-Beam*.
+
 To build FlexTrack for use with a HABDuino or other tracker using I2C communications, you need to install this library into your Arduino IDE:
 
 [https://github.com/rambo/I2C](https://github.com/rambo/I2C) 
+
+## Flashing
+
+In Arduino select *Export Compiled Binary* and then use flashing/prog.bat and follow the instructions for flashing the compiled binary into the selected COM port.
 
 ## Disclaimer
 
