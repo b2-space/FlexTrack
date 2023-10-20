@@ -27,6 +27,9 @@
 #define HEARTBEAT_LED       4       // On-board LED on GPIO4
 #define USER_BUTTON         38      // User butotn on GPIO38
 
+#define LED_TX_TIME_MS      (unsigned int)200
+#define LED_RX_TIME_MS      (unsigned int)500
+
 // Pin list
 unsigned char PinList[] = {2, 4, 13};
 
@@ -236,6 +239,8 @@ struct TGPS
   int Heading, Pitch, Roll;
   char ExtraFields[128];
   char UplinkText[33];
+  unsigned int DataSentTime;
+  unsigned int DataReceivedTime;
 } GPS;
 
 
@@ -383,6 +388,16 @@ void loop()
 
   CheckPrediction();
 
+  // Turn off LED after LoRa TX + delay
+  if (GPS.DataSentTime && ((millis() - GPS.DataSentTime) > LED_TX_TIME_MS)) {
+    GPS.DataSentTime = 0;
+    digitalWrite(HEARTBEAT_LED, HIGH);
+  }
+  // Turn off LED after LoRa RX + delay
+  if (GPS.DataReceivedTime && ((millis() - GPS.DataReceivedTime) > LED_RX_TIME_MS)) {
+    GPS.DataReceivedTime = 0;
+    digitalWrite(HEARTBEAT_LED, HIGH);
+  }
 }
 
 void CheckHost(void)
