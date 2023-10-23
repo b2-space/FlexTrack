@@ -18,6 +18,12 @@ To build FlexTrack for use with a HABDuino or other tracker using I2C communicat
 
 In Arduino select *Export Compiled Binary* and then use flashing/prog.bat and follow the instructions for flashing the compiled binary into the selected COM port.
 
+## Configuration
+
+Use USB serial communication for debugging telemetry, and reading/modifying setting through commands.
+Most configuration is available through a GUI called FlextrakConfig.exe.
+Apart from that, there is a ~LPn command which sets the LoRa Power to a number of mW.
+
 ## Disclaimer
 
 The FlexTrack code is provided as is with no guarantees of performance or operation. 

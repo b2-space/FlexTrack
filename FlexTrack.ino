@@ -41,7 +41,7 @@ unsigned char PinList[] = {2, 4, 13};
 // FIXED CONFIG
 
 #define SIG_1   'D'
-#define SIG_2   'D'
+#define SIG_2   'E'
 
 #define LORA_TIME_INDEX      2
 #define LORA_TIME_MUTLIPLER  2
@@ -142,6 +142,14 @@ AXP20X_Class axp;
 //
 //  Globals
 
+typedef enum {
+  LORA_POWER_8MW = 8,
+  LORA_POWER_10MW = 10,
+  LORA_POWER_20MW = 20,
+  LORA_POWER_25MW = 25,
+  LORA_POWER_100MW = 100
+} LoRa_power;
+
 struct TSettings
 {
   // Common
@@ -167,6 +175,7 @@ struct TSettings
   int           LoRaRepeatSlot2;
   char          UseBinaryMode;
   char          BinaryNode;
+  LoRa_power    LoRaPower;
 
   // Cutdown
   long          CutdownAltitude;
@@ -512,6 +521,7 @@ void SetDefaults(void)
   Settings.LoRaRepeatSlot2 = -1;
   Settings.UseBinaryMode = 0;
   Settings.BinaryNode = 0;
+  Settings.LoRaPower = LORA_POWER_20MW;
 
   // Cutdown Settings
   Settings.CutdownAltitude = 0;     // Disables cutdown
@@ -729,6 +739,28 @@ int ProcessLORACommand(char *Line)
     Settings.BinaryNode = atoi(Line+1);
     OK = 1;
   }
+  else if (Line[0] == 'P')
+  {
+    int power = atoi(Line+1);
+    switch (power) {
+      case LORA_POWER_8MW:
+      case LORA_POWER_10MW:
+      case LORA_POWER_20MW:
+      case LORA_POWER_25MW:
+      case LORA_POWER_100MW:
+        Settings.LoRaPower = (LoRa_power)power;
+        Serial.print("LoRa power set to: ");
+        Serial.println(power);
+        OK = 1;
+        break;
+      default:
+        // Unrecognized power setting
+        Serial.print("LoRa power NOT recognized: ");
+        Serial.println(power);
+        OK = 0;
+        break;
+    }
+  }
 
   return OK;
 }
@@ -896,6 +928,8 @@ void SendSettings(void)
 
   Serial.printf("LK=%u\n", Settings.EnableUplink);
   Serial.printf("LU=%s\n", Settings.UplinkCode);
+
+  Serial.printf("LP=%d\n", Settings.LoRaPower);
 
   Serial.printf("PC=%.1f\n", Settings.CDA);
   Serial.printf("PW=%.2f\n", Settings.PayloadWeight);
