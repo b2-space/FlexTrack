@@ -143,11 +143,23 @@ AXP20X_Class axp;
 //  Globals
 
 typedef enum {
-  LORA_POWER_8MW = 8,
-  LORA_POWER_10MW = 10,
-  LORA_POWER_20MW = 20,
-  LORA_POWER_25MW = 25,
-  LORA_POWER_100MW = 100
+  LORA_POWER_2dBm  =  2,
+  LORA_POWER_3dBm  =  3,
+  LORA_POWER_4dBm  =  4,
+  LORA_POWER_5dBm  =  5,
+  LORA_POWER_6dBm  =  6,
+  LORA_POWER_7dBm  =  7,
+  LORA_POWER_8dBm  =  8,
+  LORA_POWER_9dBm  =  9,
+  LORA_POWER_10dBm = 10,
+  LORA_POWER_11dBm = 11,
+  LORA_POWER_12dBm = 12,
+  LORA_POWER_13dBm = 13,
+  LORA_POWER_14dBm = 14,
+  LORA_POWER_15dBm = 15,
+  LORA_POWER_16dBm = 16,
+  LORA_POWER_17dBm = 17,
+  LORA_POWER_20dBm = 20
 } LoRa_power;
 
 struct TSettings
@@ -521,7 +533,7 @@ void SetDefaults(void)
   Settings.LoRaRepeatSlot2 = -1;
   Settings.UseBinaryMode = 0;
   Settings.BinaryNode = 0;
-  Settings.LoRaPower = LORA_POWER_20MW;
+  Settings.LoRaPower = LORA_POWER_13dBm;
 
   // Cutdown Settings
   Settings.CutdownAltitude = 0;     // Disables cutdown
@@ -743,11 +755,23 @@ int ProcessLORACommand(char *Line)
   {
     int power = atoi(Line+1);
     switch (power) {
-      case LORA_POWER_8MW:
-      case LORA_POWER_10MW:
-      case LORA_POWER_20MW:
-      case LORA_POWER_25MW:
-      case LORA_POWER_100MW:
+      case LORA_POWER_2dBm:
+      case LORA_POWER_3dBm:
+      case LORA_POWER_4dBm:
+      case LORA_POWER_5dBm:
+      case LORA_POWER_6dBm:
+      case LORA_POWER_7dBm:
+      case LORA_POWER_8dBm:
+      case LORA_POWER_9dBm:
+      case LORA_POWER_10dBm:
+      case LORA_POWER_11dBm:
+      case LORA_POWER_12dBm:
+      case LORA_POWER_13dBm:
+      case LORA_POWER_14dBm:
+      case LORA_POWER_15dBm:
+      case LORA_POWER_16dBm:
+      case LORA_POWER_17dBm:
+      case LORA_POWER_20dBm:
         Settings.LoRaPower = (LoRa_power)power;
         Serial.print("LoRa power set to: ");
         Serial.println(power);
