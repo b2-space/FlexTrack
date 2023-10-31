@@ -666,6 +666,7 @@ int TimeToSend(void)
 
   if ((millis() > (LastLoRaTX + Settings.LoRaCycleTime*1000+2000)) && (TimeToSendIfNoGPS == 0))
   {
+    GPS.DataSentLEDOnTime = LED_TX_TIME_MS;
     // Timed out
     Serial.println("Using Timeout");
     return 1;
@@ -674,6 +675,7 @@ int TimeToSend(void)
   if (GPS.Satellites > 0)
   {
     static int LastCycleSeconds=-1;
+    GPS.DataSentLEDOnTime = LED_TX_GPS_TIME_MS;
 
     // Can't Tx twice at the same time
     CycleSeconds = (GPS.SecondsInDay+Settings.LoRaCycleTime) % Settings.LoRaCycleTime;   // Could just use GPS time, but it's nice to see the slot agree with UTC
@@ -684,7 +686,7 @@ int TimeToSend(void)
       
       if (CycleSeconds == Settings.LoRaSlot)
       {
-        // Serial.println("Using GPS Timing");
+        Serial.println("Using GPS Timing");
         SendRepeatedPacket = 0;
         return 1;
       }
@@ -700,6 +702,7 @@ int TimeToSend(void)
   }
   else if ((TimeToSendIfNoGPS > 0) && (millis() >= TimeToSendIfNoGPS))
   {
+    GPS.DataSentLEDOnTime = 1000;
     Serial.println("Using LoRa Timing");
     SendRepeatedPacket = 0;
     return 1;

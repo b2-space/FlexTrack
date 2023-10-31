@@ -27,7 +27,8 @@
 #define HEARTBEAT_LED       4       // On-board LED on GPIO4
 #define USER_BUTTON         38      // User butotn on GPIO38
 
-#define LED_TX_TIME_MS      (unsigned int)200
+#define LED_TX_TIME_MS      (unsigned int)50
+#define LED_TX_GPS_TIME_MS  (unsigned int)200
 #define LED_RX_TIME_MS      (unsigned int)500
 
 // Pin list
@@ -262,6 +263,8 @@ struct TGPS
   char UplinkText[33];
   unsigned int DataSentTime;
   unsigned int DataReceivedTime;
+  unsigned int DataSentLEDOnTime;
+  unsigned int DataReceivedLEDOnTime;
 } GPS;
 
 
@@ -310,6 +313,9 @@ void setup()
 
   GPS.UplinkText[0] = '\0';
   GPS.ExtraFields[0] = '\0';
+
+  GPS.DataSentLEDOnTime = LED_TX_TIME_MS;
+  GPS.DataReceivedLEDOnTime = LED_RX_TIME_MS;
         
 #ifdef CUTDOWN
   GPS.CutdownAltitude = Settings.CutdownAltitude;
@@ -410,12 +416,12 @@ void loop()
   CheckPrediction();
 
   // Turn off LED after LoRa TX + delay
-  if (GPS.DataSentTime && ((millis() - GPS.DataSentTime) > LED_TX_TIME_MS)) {
+  if (GPS.DataSentTime && ((millis() - GPS.DataSentTime) > GPS.DataSentLEDOnTime)) {
     GPS.DataSentTime = 0;
     digitalWrite(HEARTBEAT_LED, HIGH);
   }
   // Turn off LED after LoRa RX + delay
-  if (GPS.DataReceivedTime && ((millis() - GPS.DataReceivedTime) > LED_RX_TIME_MS)) {
+  if (GPS.DataReceivedTime && ((millis() - GPS.DataReceivedTime) > GPS.DataReceivedLEDOnTime)) {
     GPS.DataReceivedTime = 0;
     digitalWrite(HEARTBEAT_LED, HIGH);
   }
