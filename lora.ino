@@ -139,6 +139,7 @@ int GroundCount;
 int AirCount;
 int BadCRCCount;
 unsigned char Sentence[SENTENCE_LENGTH];
+unsigned char RxSentence[SENTENCE_LENGTH];
 unsigned long LastLoRaTX=0;
 unsigned long TimeToSendIfNoGPS=0;
 int CallingCount=0;
@@ -513,20 +514,23 @@ void CheckLoRaRx(void)
       // unsigned char Message[32];
       int Bytes;
 					
-      Bytes = receiveMessage(Sentence, sizeof(Sentence));
-      Serial.print("Rx "); Serial.print(Bytes); Serial.println(" bytes");
-      Serial.println((char *)Sentence);
-      Serial.printf("Password = '%s'\n", Settings.UplinkCode);
+      Bytes = receiveMessage(RxSentence, sizeof(RxSentence));
+      
+     
       RepeatedPacketType = 0;
       
-      // Bytes = min(Bytes, sizeof(Sentence));
+      // Bytes = min(Bytes, sizeof(RxSentence));
 					
       if (Bytes > 0)
       {
         // Get RSSI etc
         int8_t SNR;
         int RSSI;
-        
+
+        Serial.print("Rx "); Serial.print(Bytes); Serial.println(" bytes");
+        Serial.println((char *)RxSentence);
+        Serial.printf("Password = '%s'\n", Settings.UplinkCode);
+
         SNR = readRegister(REG_PACKET_SNR);
         SNR /= 4;
         RSSI = readRegister(REG_PACKET_RSSI) - 157;
@@ -538,13 +542,13 @@ void CheckLoRaRx(void)
         GPS.LastPacketSNR = SNR;
         GPS.LastPacketRSSI = RSSI;
 
-        Serial.printf("Command byte = '%c'\n", Sentence[0]);
+        Serial.printf("Command byte = '%c'\n", RxSentence[0]);
 
-        if (Sentence[0] == '$')
+        if (RxSentence[0] == '$')
         {
           // ASCII telemetry
           Serial.println("Rx ASCII");
-          if (memcmp(Sentence+2, Settings.PayloadID, strlen(Settings.PayloadID)) != 0)
+          if (memcmp(RxSentence+2, Settings.PayloadID, strlen(Settings.PayloadID)) != 0)
           {
             RepeatedPacketType = 3;
           }
@@ -555,7 +559,7 @@ void CheckLoRaRx(void)
             unsigned char Slot;
             long Offset;
 
-            Slot = (Sentence[LORA_TIME_INDEX+2] - '0') * LORA_TIME_MUTLIPLER + LORA_TIME_OFFSET;
+            Slot = (RxSentence[LORA_TIME_INDEX+2] - '0') * LORA_TIME_MUTLIPLER + LORA_TIME_OFFSET;
             Offset = (Settings.LoRaSlot - Slot) * 1000L - LORA_PACKET_TIME;
             if (Offset < 0) Offset += Settings.LoRaCycleTime * 1000L;
 
@@ -565,23 +569,26 @@ void CheckLoRaRx(void)
             TimeToSendIfNoGPS = millis() + Offset;
           }
         }
-        else if (Sentence[0] == '*')
+        else if (RxSentence[0] == '*')
         {
           char Command, Parameter, PayloadID[32], *Message;
           
-          Message = (char *)(Sentence + 1);
+          Message = (char *)(RxSentence + 1);
 
           Serial.println("Rx command");
           
           DecryptMessage(Settings.UplinkCode, Message);
                    
-          Serial.printf("Uplink: %s\n", Sentence);
+          Serial.printf("Uplink: %s\n", RxSentence);
 
           GetString(PayloadID, &Message, '/');
           
           if (strcmp(PayloadID, Settings.PayloadID) == 0)
           {
             GPS.ReceivedCommandCount++;
+
+            digitalWrite(HEARTBEAT_LED, LOW);
+            GPS.DataReceivedTime = millis();
 
             strncpy(GPS.LastReceivedCommand, Message, sizeof(GPS.LastReceivedCommand));
             
@@ -647,6 +654,8 @@ void CheckLoRaRx(void)
             }
           }
         }
+      } else {
+        Serial.println("Warning: 0 Bytes received");
       }
     }
   }
@@ -823,9 +832,6 @@ void lora_sleep(void)
 int receiveMessage(unsigned char *message, int MaxLength)
 {
   int i, Bytes, currentAddr, x;
-
-  digitalWrite(HEARTBEAT_LED, LOW);
-  GPS.DataReceivedTime = millis();
 
   Bytes = 0;
 	
