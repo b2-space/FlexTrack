@@ -149,6 +149,8 @@ int SendingRTTY=0;
 int RTTYIndex, RTTYMask, RTTYLength;
 int FSKBitRate, FSKOverSample, RTTYBitLength;
 
+int gps_flag = 0;
+
 void SetupLoRa(void)
 {
   pinMode(LORA_NSS, OUTPUT);
@@ -672,8 +674,8 @@ int TimeToSend(void)
     // Not using time to decide when we can send
     return 1;
   }
-
-  if ((millis() > (LastLoRaTX + Settings.LoRaCycleTime*1000+2000)) && (TimeToSendIfNoGPS == 0))
+ 
+  if ((millis() > (LastLoRaTX + Settings.LoRaCycleTime*1000+2000)) && (TimeToSendIfNoGPS == 0) && (gps_flag == 0))
   {
     GPS.DataSentLEDOnTime = LED_TX_TIME_MS;
     // Timed out
@@ -683,6 +685,7 @@ int TimeToSend(void)
   
   if (GPS.Satellites > 0)
   {
+    gps_flag = 1;
     static int LastCycleSeconds=-1;
     GPS.DataSentLEDOnTime = LED_TX_GPS_TIME_MS;
 
