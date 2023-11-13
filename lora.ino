@@ -556,7 +556,7 @@ void CheckLoRaRx(void)
           }
 
           // Get timing from this message
-          if ((LORA_TIME_INDEX > 0) && (LORA_TIME_MUTLIPLER > 0))
+          if ((Settings.LoRaNoGPSSync == true) && (LORA_TIME_INDEX > 0) && (LORA_TIME_MUTLIPLER > 0))
           {
             unsigned char Slot;
             long Offset;
@@ -712,7 +712,7 @@ int TimeToSend(void)
       }
     }
   }
-  else if ((TimeToSendIfNoGPS > 0) && (millis() >= TimeToSendIfNoGPS))
+  else if ((Settings.LoRaNoGPSSync == true) && ((TimeToSendIfNoGPS > 0) && (millis() >= TimeToSendIfNoGPS)))
   {
     GPS.DataSentLEDOnTime = 1000;
     Serial.println("Using LoRa Timing");

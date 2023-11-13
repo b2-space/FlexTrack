@@ -42,7 +42,7 @@ unsigned char PinList[] = {2, 4, 13};
 // FIXED CONFIG
 
 #define SIG_1   'D'
-#define SIG_2   'E'
+#define SIG_2   'F'
 
 #define LORA_TIME_INDEX      2
 #define LORA_TIME_MUTLIPLER  2
@@ -189,6 +189,7 @@ struct TSettings
   char          UseBinaryMode;
   char          BinaryNode;
   LoRa_power    LoRaPower;
+  bool          LoRaNoGPSSync;
 
   // Cutdown
   long          CutdownAltitude;
@@ -540,6 +541,7 @@ void SetDefaults(void)
   Settings.UseBinaryMode = 0;
   Settings.BinaryNode = 0;
   Settings.LoRaPower = LORA_POWER_13dBm;
+  Settings.LoRaNoGPSSync = false;
 
   // Cutdown Settings
   Settings.CutdownAltitude = 0;     // Disables cutdown
@@ -791,7 +793,28 @@ int ProcessLORACommand(char *Line)
         break;
     }
   }
-
+  else if (Line[0] == 'G')
+  {
+    int nogpssync = atoi(Line+1);
+    if(nogpssync==0)
+    {
+      Settings.LoRaNoGPSSync = false; 
+      Serial.print("LoRa set synchronization without gps to off");
+      OK=1;
+    }
+    else if(nogpssync==1)
+    {
+      Settings.LoRaNoGPSSync = true; 
+      Serial.print("LoRa set synchronization without gps to on");
+      OK=1;
+    }
+    else
+    {
+      Serial.print("LoRa noGpssynchronization NOT recognized: ");
+      Serial.println(nogpssync);
+      OK=0;
+    }
+  }
   return OK;
 }
 
