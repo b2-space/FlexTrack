@@ -683,7 +683,7 @@ int TimeToSend(void)
     return 1;
   }
   
-  if (GPS.Satellites > 0)
+  if (GPS.FixType > 0)
   {
     gps_flag = 1;
     static int LastCycleSeconds=-1;

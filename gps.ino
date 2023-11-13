@@ -123,13 +123,14 @@ void ProcessNMEA(char *Buffer, int Count)
   
     if (strncmp(Buffer+3, "GGA", 3) == 0)
     {
-      int lock;
+      int lock = 0;
       char hdop[16], Altitude[16];
       
       // Serial.print(Buffer+1);
-      
+      GPS.FixType=0;
       if (sscanf(Buffer+7, "%16[^,],%16[^,],%c,%[^,],%c,%d,%d,%[^,],%[^,]", TimeString, LatString, &ns, LongString, &ew, &lock, &Satellites, hdop, Altitude) >= 1)
       { 
+        GPS.FixType=lock;
         // $GPGGA,124943.00,5157.01557,N,00232.66381,W,1,09,1.01,149.3,M,48.6,M,,*42
         Temp[0] = TimeString[0]; Temp[1] = TimeString[1]; Temp[2] = '\0';
         GPS.Hours = atoi(Temp);
