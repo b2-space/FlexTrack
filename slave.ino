@@ -7,6 +7,9 @@ typedef enum {
   REG_LATITUDE          = 0x01,   // R       Float
   REG_LONGITUDE         = 0x02,   // R       Float
   REG_ALTITUDE          = 0x03,   // R       Long
+  REG_FIX               = 0x04,   // R       Byte
+  REG_SATELLITES        = 0x05,   // R       Byte
+  REG_TIME              = 0x06,   // R       char[6] (hhmmss)
   REG_UPLINK_STR_LEN    = 0x10,   // R       size_t
   REG_UPLINK_STR        = 0x11,   // RW      string
   REG_DOWNLINK_STR_LEN  = 0x20,   // R       size_t
@@ -33,6 +36,25 @@ void onRequest()
       Wire.write((uint8_t *)&GPS.Altitude, 4);
       Serial.printf("send Altitude %d\r\n", GPS.Altitude);
       break;
+    case REG_FIX:
+      Wire.write((uint8_t *)&GPS.FixType, 1);
+      Serial.printf("send Fix %d\r\n", GPS.FixType);
+      break;
+    case REG_SATELLITES:
+    {
+      unsigned char satellites = GPS.Satellites;
+      Wire.write((uint8_t *)&satellites, 1);
+      Serial.printf("send Satellites %d\r\n", satellites);
+      break;
+    }
+    case REG_TIME:
+    {
+      char time_str[6+1];
+      sprintf(time_str,"%02d%02d%02d", GPS.Hours, GPS.Minutes, GPS.Seconds);
+      Wire.write((uint8_t *)time_str, strlen(time_str));
+      Serial.printf("send Time %s\r\n", time_str);
+      break;
+    }
     case REG_UPLINK_STR_LEN:
       string_length = strlen(GPS.UplinkText);
       Wire.write(&string_length, 1);
@@ -98,6 +120,31 @@ void onReceive(int len)
         Serial.println("Invalid");
       }
       break;
+    case REG_FIX:
+      Wire.slaveWrite((uint8_t *)&GPS.FixType, 1);
+      if (Wire.available()) {
+        Serial.println("Invalid");
+      }
+      break;
+    case REG_SATELLITES:
+    {
+      unsigned char satellites = GPS.Satellites;
+      Wire.slaveWrite((uint8_t *)&satellites, 1);
+      if (Wire.available()) {
+        Serial.println("Invalid");
+      }
+      break;
+    }
+    case REG_TIME:
+    {
+      char time_str[6+1];
+      sprintf(time_str,"%02d%02d%02d", GPS.Hours, GPS.Minutes, GPS.Seconds);
+      Wire.slaveWrite((uint8_t *)time_str, strlen(time_str));
+      if (Wire.available()) {
+        Serial.println("Invalid");
+      }
+      break;
+    }
     case REG_UPLINK_STR_LEN:
       string_length = strlen(GPS.UplinkText);
       Wire.slaveWrite(&string_length, 1);
