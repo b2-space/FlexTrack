@@ -35,14 +35,14 @@
 unsigned char PinList[] = {2, 4, 13};
 
 // PRODUCT INFO
-#define   VERSION     "V1.47"
+#define   VERSION     "V1.48"
 #define   PRODUCT     "FlexTrack"
-#define   DESCRIPTION "T-Beam with B2Space Mods and extra I2C comms and debug"
+#define   DESCRIPTION "T-Beam with B2Space Mods, adaptative AXP and (opt) I2C slave comms"
 
 // FIXED CONFIG
 
 #define SIG_1   'D'
-#define SIG_2   'F'
+#define SIG_2   'G'
 
 #define LORA_TIME_INDEX      2
 #define LORA_TIME_MUTLIPLER  2
@@ -136,8 +136,6 @@ unsigned char PinList[] = {2, 4, 13};
 #define FIELDLIST_LENGTH       24
 #define COMMAND_BUFFER_LENGTH  80
 
-#include <axp20x.h>
-AXP20X_Class axp;
 
 //------------------------------------------------------------------------------------------------------
 //
@@ -168,6 +166,7 @@ struct TSettings
   // Common
   char PayloadID[PAYLOAD_LENGTH];
   char FieldList[FIELDLIST_LENGTH];
+  bool I2CSlave;
 
   // GPS
   unsigned int FlightModeAltitude;
@@ -212,6 +211,8 @@ struct TSettings
   unsigned int  RTTYEvery;
   unsigned int  RTTYPreamble;
 } Settings;
+
+bool I2CSlave;
 
 #define EEPROM_SIZE sizeof(Settings)
 
@@ -308,6 +309,8 @@ void setup()
     Serial.println("Placing default settings in EEPROM");
     SetDefaults();
   }
+
+  I2CSlave = Settings.I2CSlave;
   
   Serial.print("Payload ID ");
   Serial.println(Settings.PayloadID);
@@ -324,31 +327,13 @@ void setup()
   SetupCutdown();
 #endif
 
-  Wire.begin(21, 22);
-  if (!axp.begin(Wire, AXP192_SLAVE_ADDRESS))
-  {
-    Serial.println("AXP192 OK");
+  if (!axp_begin()) {
+    Serial.println("AXP error");
+    while(1);
   } else {
-    Serial.println("AXP192 FAIL");
+    axp_config();
+    axp_print();
   }
-  axp.setPowerOutPut(AXP192_LDO2, AXP202_ON);   // LoRa On
-  axp.setPowerOutPut(AXP192_LDO3, AXP202_ON);   // GPS On
-  axp.setPowerOutPut(AXP192_DCDC2, AXP202_OFF);  // ??
-  axp.setPowerOutPut(AXP192_EXTEN, AXP202_OFF);  // ??
-  axp.setPowerOutPut(AXP192_DCDC1, AXP202_ON);  // OLED Off
-  // axp.setDCDC1Voltage(3300);
-  
-//  Serial.printf("DCDC1: %s\n", axp.isDCDC1Enable() ? "ENABLE" : "DISABLE");
-//  Serial.printf("DCDC2: %s\n", axp.isDCDC2Enable() ? "ENABLE" : "DISABLE");
-//  Serial.printf("DCDC3: %s\n", axp.isDCDC3Enable() ? "ENABLE" : "DISABLE");
-//  Serial.printf("LDO2: %s\n", axp.isLDO2Enable() ? "ENABLE" : "DISABLE");
-//  Serial.printf("LDO3: %s\n", axp.isLDO3Enable() ? "ENABLE" : "DISABLE");
-//  Serial.printf("Exten: %s\n", axp.isExtenEnable() ? "ENABLE" : "DISABLE");
-
-  if (axp.isChargeing()) {
-      Serial.println("Charging");
-  }  
-  Wire.end();
 
 #ifdef OLED
   SetupOLED();
@@ -376,9 +361,11 @@ void setup()
   SetupPins();
 #endif
 
-#ifdef I2C_SLAVE_ADDR
+  SetupLEDs();
+
+if (I2CSlave) {
   SetupSlave();
-#endif
+}
 
   digitalWrite(HEARTBEAT_LED, HIGH); // Turn off LED after setup
 }
@@ -397,8 +384,12 @@ void loop()
 #endif
 
   CheckLoRa();
-   
+
+if (!I2CSlave) {
   CheckLEDs();
+
+  axp_check();
+}
 
 #ifdef WIREBUS
   Checkds18b20();
@@ -525,6 +516,8 @@ void SetDefaults(void)
 
   const static char DefaultFieldList[] = "0123456CD";
   strcpy(Settings.FieldList, (char *)DefaultFieldList);
+
+  Settings.I2CSlave = true;
 
   // GPS Settings
   Settings.FlightModeAltitude = 2000;
@@ -662,6 +655,14 @@ int ProcessCommonCommand(char *Line)
   {
     // Cutdown Time  
     Settings.CutdownPeriod = atoi(Line+1);
+    OK = 1;
+  }
+  else if (Line[0] == 'I')
+  {
+    // I2C Slave
+    Settings.I2CSlave = (atoi(Line+1) > 0);
+    Serial.printf("I2C slave %s. Reset to apply\n",
+      Settings.I2CSlave ? "enabled" : "disabled");
     OK = 1;
   }
 

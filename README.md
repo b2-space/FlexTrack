@@ -10,13 +10,17 @@ This code provides simultaneous (where legal and supported by the hardware insta
 
 In Arduino add esp32 boards and select *T-Beam*.
 
+This program works on several T-Beam models: 433MHz/868MHz, T-Beam 1.1/2.
+It will automatically detect the power supply (it differs from T-Beam 1.1 to 1.2) and select the appropriate code using LilyGo XPowersLib.
+
 To build FlexTrack for use with a HABDuino or other tracker using I2C communications, you need to install this library into your Arduino IDE:
 
 [https://github.com/rambo/I2C](https://github.com/rambo/I2C) 
 
 ## Flashing
 
-In Arduino select *Export Compiled Binary* and then use flashing/prog.bat and follow the instructions for flashing the compiled binary into the selected COM port.
+In Arduino select the COM port of the T-Beam and click on Upload.
+Otherwise locate the binary file (can be generated via *Export Compiled Binary* in Arduino) and then use flashing/prog.bat and follow the instructions for flashing the compiled binary into the selected COM port.
 
 ## Configuration
 

@@ -1,5 +1,3 @@
-#ifdef I2C_SLAVE_ADDR
-
 #include <Wire.h>
 
 typedef enum {
@@ -193,11 +191,9 @@ void onReceive(int len)
 
 void SetupSlave()
 {
+  Wire.end();
   Serial.println("Setting up I2C slave");
   Wire.onReceive(onReceive);
   Wire.onRequest(onRequest);
   Wire.begin((uint8_t)I2C_SLAVE_ADDR);  // , I2C_SLAVE_SDA_PIN, I2C_SLAVE_SCL_PIN);
 }
-
-
-#endif
