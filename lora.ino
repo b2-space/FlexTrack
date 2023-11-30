@@ -10,6 +10,9 @@
 #include <SPI.h>
 #include <string.h>
 
+// Wilcard string for comparing Id in received telemetry
+#define WILDCARD_STR               "?"
+
 // RFM98 registers
 #define REG_FIFO                    0x00
 #define REG_OPMODE                  0x01
@@ -507,6 +510,46 @@ int32_t GetInteger(char **Message, char delimiter)
   return atoi(Temp);
 }
 
+// Compares two string too see if they match using WILDCARD_STR to match any char
+// param PayloadID: received string which might have WILDCARD_STR
+// param Settings_PayloadID: stored string
+// return: true if strings match, false otherwise
+bool compare_strings_wildcard(const char *PayloadID) {
+  bool result = false;
+  bool finished = false;
+  byte total_length = 0;
+  byte cmp_length = 0;
+  const char *p_payloadID = PayloadID;
+  const char *p_settingsId = Settings.PayloadID;
+  
+  // Check only strings of same length
+  if (strlen(PayloadID) == strlen(Settings.PayloadID)) {
+    while (!finished) {
+      // Point to next char to compare
+      p_payloadID = PayloadID + cmp_length;
+      p_settingsId = Settings.PayloadID + cmp_length;
+      // Read how much to compare until wildcard or end and accumulate
+      cmp_length = strcspn(p_payloadID, WILDCARD_STR);
+      total_length += cmp_length;
+      // Compare chars in string
+      result = !strncmp(p_payloadID, p_settingsId, cmp_length);
+      if (result == false) {
+        // Strings don't match
+        finished = true;
+      } else {
+        // Get over wildcard char
+        cmp_length++;
+        total_length++;
+        // Check end of string
+        if (total_length >= strlen(PayloadID)) {
+          finished = true;
+        }
+      }
+    }
+  }
+  return result;
+}
+
 void CheckLoRaRx(void)
 {
   if (LoRaMode == lmListening)
@@ -585,7 +628,7 @@ void CheckLoRaRx(void)
 
           GetString(PayloadID, &Message, '/');
           
-          if (strcmp(PayloadID, Settings.PayloadID) == 0)
+          if (!strcmp(PayloadID, Settings.PayloadID) || compare_strings_wildcard(PayloadID))
           {
             GPS.ReceivedCommandCount++;
 
