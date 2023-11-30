@@ -20,6 +20,10 @@
 // Optional devices - uncomment if present
 // #define BMP085         // Also works with BMP180
 // #define BNO085
+// Additional devices for Rocket Tracker
+#define LSM6DSO32           // IMU (accelerometer + gyroscope)
+#define MPRLS               // Pressure sensor
+#define PCT2075             // Temperature sensor
 
 // Options
 #define CUTDOWN             25      // This pin made active to cut down from balloon
@@ -36,8 +40,8 @@ unsigned char PinList[] = {2, 4, 13};
 
 // PRODUCT INFO
 #define   VERSION     "V1.48"
-#define   PRODUCT     "FlexTrack"
-#define   DESCRIPTION "T-Beam with B2Space Mods, adaptative AXP and (opt) I2C slave comms"
+#define   PRODUCT     "FlexTrack Rocket"
+#define   DESCRIPTION "T-Beam with B2Space Mods, adaptative AXP and Rocket Sensors"
 
 // FIXED CONFIG
 
@@ -367,6 +371,24 @@ if (I2CSlave) {
   SetupSlave();
 }
 
+#ifdef LSM6DSO32
+  if(!SetupDSO32()) {
+    while(1);
+  }
+#endif
+
+#ifdef MPRLS
+  if(!SetupMPRLS()) {
+    while(1);
+  }
+#endif
+
+#ifdef PCT2075
+  if(!SetupPCT2075()) {
+    while(1);
+  }
+#endif
+
   digitalWrite(HEARTBEAT_LED, HIGH); // Turn off LED after setup
 }
 
@@ -406,6 +428,18 @@ if (!I2CSlave) {
   CheckHost();
 
   CheckPrediction();
+
+#ifdef LSM6DSO32
+  CheckDSO32();
+#endif
+
+#ifdef MPRLS
+  CheckMPRLS();
+#endif
+
+#ifdef PCT2075
+  CheckPCT2075();
+#endif
 
   // Turn off LED after LoRa TX + delay
   if (GPS.DataSentTime && ((millis() - GPS.DataSentTime) > GPS.DataSentLEDOnTime)) {
@@ -517,7 +551,7 @@ void SetDefaults(void)
   const static char DefaultFieldList[] = "0123456CD";
   strcpy(Settings.FieldList, (char *)DefaultFieldList);
 
-  Settings.I2CSlave = true;
+  Settings.I2CSlave = false;
 
   // GPS Settings
   Settings.FlightModeAltitude = 2000;
@@ -660,10 +694,9 @@ int ProcessCommonCommand(char *Line)
   else if (Line[0] == 'I')
   {
     // I2C Slave
-    Settings.I2CSlave = (atoi(Line+1) > 0);
-    Serial.printf("I2C slave %s. Reset to apply\n",
+    Settings.I2CSlave = false;
+    Serial.printf("I2C slave forced %s in this version\n",
       Settings.I2CSlave ? "enabled" : "disabled");
-    OK = 1;
   }
 
   return OK;

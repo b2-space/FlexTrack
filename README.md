@@ -1,4 +1,4 @@
-## FlexTrack 
+## FlexTrack - Rocket Version
 
 Flexible Arduino-based tracker software for RTTY, LoRa and APRS.
 
@@ -12,6 +12,11 @@ In Arduino add esp32 boards and select *T-Beam*.
 
 This program works on several T-Beam models: 433MHz/868MHz, T-Beam 1.1/2.
 It will automatically detect the power supply (it differs from T-Beam 1.1 to 1.2) and select the appropriate code using LilyGo XPowersLib.
+
+For the additional sensor board connected to the Rocket Tracker, following libraries are required:
+- Adafruit_LSM6DSO32
+- Adafruit_MPRLS
+- Adafruit_PCT2075
 
 To build FlexTrack for use with a HABDuino or other tracker using I2C communications, you need to install this library into your Arduino IDE:
 
