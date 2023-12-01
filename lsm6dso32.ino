@@ -1,5 +1,6 @@
 #ifdef LSM6DSO32
 
+#include <math.h>
 #include <Adafruit_LSM6DSO32.h>
 
 #define CHECK_IMU_TIME 1000 // Sample time in [ms]
@@ -150,16 +151,26 @@ void CheckDSO32() {
     sensors_event_t temp;
     dso32.getEvent(&accel, &gyro, &temp);
 
-    Serial.print("IMU Temperature (ºC): "); Serial.println(temp.temperature);
+#ifndef PCT2075
+    GPS.ExternalTemperature = temp.temperature;
+#endif
 
-    /* Display the results (acceleration is measured in m/s^2) */
     // TODO: acceleration seem to be negative value for all axes
-    Serial.printf("IMU Acceleration (m/s^2): x:%f y:%f z:%f\n",
-      accel.acceleration.x, accel.acceleration.y, accel.acceleration.z);
 
-    /* Display the results (rotation is measured in rad/s) */
-    Serial.printf("IMU Rotation (rad/s): x:%f y:%f z:%f\n",
-      gyro.gyro.x, gyro.gyro.y, gyro.gyro.z);
+    // /* Display the results (acceleration is measured in m/s^2) */
+    // Serial.printf("IMU Acceleration (m/s^2): x:%f y:%f z:%f\n",
+    //   accel.acceleration.x, accel.acceleration.y, accel.acceleration.z);
+    
+    // Store magnitude of the acceleration vector
+    GPS.Acceleration = sqrt(accel.acceleration.x * accel.acceleration.x +
+      accel.acceleration.y * accel.acceleration.y + accel.acceleration.z * accel.acceleration.z);
+
+    // /* Display the results (rotation is measured in rad/s) */
+    // Serial.printf("IMU Rotation (rad/s): x:%f y:%f z:%f\n",
+    //   gyro.gyro.x, gyro.gyro.y, gyro.gyro.z);
+    
+    // Store magnitude of the angular velocity
+    GPS.Rotation = sqrt(gyro.gyro.x * gyro.gyro.x + gyro.gyro.y * gyro.gyro.y + gyro.gyro.z * gyro.gyro.z);
 
     IMUTime = millis();
   }

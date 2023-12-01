@@ -245,6 +245,8 @@ struct TGPS
   float BatteryVoltage;
   float ExternalTemperature;
   float Pressure;
+  float PressureMin;
+  long MaximumBaroAltitude;
   float AscentRate;
   unsigned int BoardCurrent;
   unsigned int errorstatus;
@@ -271,6 +273,8 @@ struct TGPS
   unsigned int DataReceivedTime;
   unsigned int DataSentLEDOnTime;
   unsigned int DataReceivedLEDOnTime;
+  float Acceleration;
+  float Rotation;
 } GPS;
 
 
@@ -548,7 +552,7 @@ void SetDefaults(void)
   // Common settings
   strcpy(Settings.PayloadID, "TTGO");
 
-  const static char DefaultFieldList[] = "0123456CD";
+  const static char DefaultFieldList[] = "012345BIKLM";
   strcpy(Settings.FieldList, (char *)DefaultFieldList);
 
   Settings.I2CSlave = false;

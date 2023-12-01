@@ -62,15 +62,15 @@ int BuildSentence(char *TxLine)
     else if (Field == '9')
     {
       // ADC
-      sprintf(Temp, "%d", GPS.BatteryVoltage);
+      sprintf(Temp, "%.1f", GPS.BatteryVoltage);
     }
     else if (Field == 'A')
     {
-      sprintf(Temp, "%d", GPS.InternalTemperature);
+      sprintf(Temp, "%.1f", GPS.InternalTemperature);
     }
     else if (Field == 'B')
     {
-      sprintf(Temp, "%d", GPS.ExternalTemperature);
+      sprintf(Temp, "%.1f", GPS.ExternalTemperature);
     }
     else if (Field == 'C')
     {
@@ -96,10 +96,26 @@ int BuildSentence(char *TxLine)
     {
       sprintf(Temp, "%u", GPS.ReceivedCommandCount);
     }
-//    else if ((Field >= 'I') && (Field <= 'N'))
-//    {
-//      sprintf(Temp, "%u", GPS.ExtraFields[Field-'I']);
-//    }
+    else if (Field == 'I')
+    {
+      sprintf(Temp, "%.2f", GPS.Pressure);
+    }
+    else if (Field == 'J')
+    {
+      sprintf(Temp, "%.2f", GPS.PressureMin);
+    }
+    else if (Field == 'K')
+    {
+      sprintf(Temp, "%d", GPS.MaximumBaroAltitude);
+    }
+    else if (Field == 'L')
+    {
+      sprintf(Temp, "%.1f", GPS.Acceleration);
+    }
+    else if (Field == 'M')
+    {
+      sprintf(Temp, "%.1f", GPS.Rotation);
+    }
     else if (Field == 'O')
     {
       sprintf(Temp, "%ld", GPS.MaximumAltitude);
