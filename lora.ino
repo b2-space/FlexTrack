@@ -718,7 +718,7 @@ int TimeToSend(void)
     return 1;
   }
  
-  if ((millis() > (LastLoRaTX + Settings.LoRaCycleTime*1000+2000)) && (TimeToSendIfNoGPS == 0) && (gps_flag == 0))
+  if ((millis() > (LastLoRaTX + Settings.LoRaCycleTime*1000)) && (TimeToSendIfNoGPS == 0) && (GPS.FixType == 0))
   {
     GPS.DataSentLEDOnTime = LED_TX_TIME_MS;
     // Timed out
