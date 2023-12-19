@@ -8,7 +8,7 @@ typedef enum {
   REG_FIX               = 0x04,   // R       Byte
   REG_SATELLITES        = 0x05,   // R       Byte
   REG_TIME              = 0x06,   // R       char[6] (hhmmss)
-  REG_UPLINK_STR_LEN    = 0x10,   // R       size_t
+  REG_UPLINK_STR_LEN    = 0x10,   // RW      size_t
   REG_UPLINK_STR        = 0x11,   // RW      string
   REG_DOWNLINK_STR_LEN  = 0x20,   // R       size_t
   REG_DOWNLINK_STR      = 0x21,   // R       string
@@ -62,7 +62,6 @@ void onRequest()
       if (*GPS.UplinkText) {
         Wire.write((uint8_t *)&GPS.UplinkText, strlen(GPS.UplinkText));
         Serial.printf("send uplink str %s\r\n", GPS.UplinkText);
-        GPS.UplinkText[0] = '\0'; // mark as read
       } else {
         Wire.write(empty_string, 1);
         Serial.println("no uplink str");
@@ -146,6 +145,12 @@ void onReceive(int len)
     case REG_UPLINK_STR_LEN:
       string_length = strlen(GPS.UplinkText);
       Wire.slaveWrite(&string_length, 1);
+      // If received ony byte '\0', Uplink marked as read
+      if(Wire.available() && Wire.read() == '\0')
+      {
+        GPS.UplinkText[0] = '\0';
+        Serial.println("Uplink marked as read");
+      }
       if (Wire.available()) {
         Serial.println("Invalid");
       }
