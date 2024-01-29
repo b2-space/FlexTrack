@@ -35,7 +35,7 @@
 unsigned char PinList[] = {2, 4, 13};
 
 // PRODUCT INFO
-#define   VERSION     "V1.48"
+#define   VERSION     "V1.49"
 #define   PRODUCT     "FlexTrack"
 #define   DESCRIPTION "T-Beam with B2Space Mods, adaptative AXP and (opt) I2C slave comms"
 
